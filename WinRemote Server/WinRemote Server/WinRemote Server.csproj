@@ -62,7 +62,7 @@
       <DependentUpon>FormSettings.cs</DependentUpon>
     </Compile>
     <Compile Include="Settings\SettingsHelper.cs" />
-    <Compile Include="Settings\Settings.cs" />
+    <Compile Include="Settings\LoadedSettings.cs" />
     <Compile Include="Util\Logger.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

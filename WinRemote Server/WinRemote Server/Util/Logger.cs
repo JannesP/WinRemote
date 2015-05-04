@@ -86,7 +86,8 @@ namespace WinRemote_Server
                 StreamWriter writer = CreateWriter(fileName);
                 string logLine = CreateTimeString() + ": " + prefix + "\t" + message + "\n";
                 //write to log window
-                logBox.AppendText(logLine);
+                logBox.Invoke((MethodInvoker)(() => logBox.AppendText(logLine)));
+                //logBox.AppendText(logLine);
                 //write to file
                 writer.Write(logLine);
                 writer.Close();
@@ -95,9 +96,8 @@ namespace WinRemote_Server
 
         private static string CreateTimeString()
         {
-            return String.Format("{0:00}:{1:00}:{2:00}:{3:000}", DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second, DateTime.Now.Millisecond);
+            return string.Format("{0:00}:{1:00}:{2:00}:{3:000}", DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second, DateTime.Now.Millisecond);
         }
-        
     }
 
     

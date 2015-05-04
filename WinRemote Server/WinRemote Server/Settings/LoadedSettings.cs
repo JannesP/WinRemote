@@ -6,11 +6,38 @@ using System.Threading.Tasks;
 
 namespace WinRemote_Server.Settings
 {
-    static class Settings
+    static class LoadedSettings
     {
         public const string KEY_BINDING_ADDRESS = "bindingAddress";
         public const string KEY_USE_BINDING_ADDRESS = "useBindingAddress";
         public const string KEY_PORT = "port";
+
+        private static class Defaults
+        {
+            private static Dictionary<string, string> defaults = new Dictionary<string, string>();
+
+            static Defaults()
+            {
+                defaults.Add(KEY_BINDING_ADDRESS, "");
+                defaults.Add(KEY_USE_BINDING_ADDRESS, "false");
+                defaults.Add(KEY_PORT, "5555");
+            }
+
+            public static string GetValue(string key)
+            {
+                string returnValue = "";
+                bool foundVal = defaults.TryGetValue(key, out returnValue);
+                if (foundVal)
+                {
+                    return returnValue;
+                }
+                else
+                {
+                    throw new MissingFieldException("The requested key: " + key + " is missing in the default config! Try deleting settings file.");
+                }
+            }
+
+        }
 
 
         private static Dictionary<string, string> settings = new Dictionary<string, string>();
@@ -103,31 +130,6 @@ namespace WinRemote_Server.Settings
             return result;
         }
 
-        public static class Defaults
-        {
-            private static Dictionary<string, string> defaults = new Dictionary<string, string>();
-
-            static Defaults()
-            {
-                defaults.Add("port", "5555");
-                defaults.Add("bindingAddress", "");
-                defaults.Add("useBindingAddress", "false");
-            }
-
-            public static string GetValue(string key)
-            {
-                string returnValue = "";
-                bool foundVal = defaults.TryGetValue(key, out returnValue);
-                if (foundVal)
-                {
-                    return returnValue;
-                }
-                else
-                {
-                    throw new MissingFieldException("The requested key: " + key + " is missing in the default config! Try deleting settings file.");
-                }
-            }
-
-        }
+        
     }
 }

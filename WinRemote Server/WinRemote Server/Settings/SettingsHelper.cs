@@ -13,7 +13,7 @@ namespace WinRemote_Server.Settings
 
         public static void Init()
         {
-            Settings.initialized = true;
+            LoadedSettings.initialized = true;
             if (!File.Exists(FILE_NAME)) 
             {
                 File.Create(FILE_NAME).Close();
@@ -38,7 +38,7 @@ namespace WinRemote_Server.Settings
                 }
                 else
                 {
-                    Settings.WriteValue(splitResult[0], splitResult[1]);
+                    LoadedSettings.WriteValue(splitResult[0], splitResult[1]);
                 }
             }
         }
@@ -47,7 +47,7 @@ namespace WinRemote_Server.Settings
         {
             Logger.Log("Saving", "Start saving all files ...");
             long startTime = DateTime.Now.Ticks;
-            string[] lines = Settings.GetSaveFileLines();
+            string[] lines = LoadedSettings.GetSaveFileLines();
             File.WriteAllLines(FILE_NAME, lines, Encoding.UTF8);
             double msTaken = (double)(DateTime.Now.Ticks - startTime) / 10000d;
             Logger.Log("Saving", "Saving took " + msTaken + " ms.");
