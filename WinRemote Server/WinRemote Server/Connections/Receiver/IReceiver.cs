@@ -9,8 +9,8 @@ namespace WinRemote_Server.Connections.Receiver
 {
     interface IReceiver
     {
-        void OnReceiveMessage(int message);
-        void OnReceiveMessage(int message, object extras);
-        void OnListenerStatusChange(NetworkListener.NetworkStatus status);
+        void OnReceiveMessage(NetworkInterface.Message message);
+        void OnReceiveMessage(NetworkInterface.Message message, object extras);
+        void OnListenerStatusChange(NetworkInterface.NetworkStatus status);
     }
 }

@@ -10,7 +10,7 @@ using WinRemote_Server.Connections.Receiver;
 
 namespace WinRemote_Server.Connections.Listener
 {
-    class TcpNetworkListener : NetworkListener
+    class TcpNetworkInterface : NetworkInterface
     {
         // Thread signal. 
         public static ManualResetEvent tcpClientConnected = new ManualResetEvent(false);
@@ -20,9 +20,9 @@ namespace WinRemote_Server.Connections.Listener
 
         private bool listen = false;
 
-        public TcpNetworkListener(int port, IReceiver receiver) : this(IPAddress.Any, port, receiver) {   }
+        public TcpNetworkInterface(int port, IReceiver receiver) : this(IPAddress.Any, port, receiver) {   }
 
-        public TcpNetworkListener(IPAddress bindingAddress, int port, IReceiver receiver) : base(receiver)
+        public TcpNetworkInterface(IPAddress bindingAddress, int port, IReceiver receiver) : base(receiver)
         {
             tcpListener = new TcpListener(bindingAddress, port);
         }
@@ -67,7 +67,7 @@ namespace WinRemote_Server.Connections.Listener
             finally
             {
                 tcpListener.Stop();
-                Logger.Log("TcpListener", "Server closed successfully!");
+                Logger.Log("TcpListener", "Server closed!");
             }
         }
 
@@ -89,7 +89,7 @@ namespace WinRemote_Server.Connections.Listener
                 data = ReadIntFromByteArray(buffer, 0);
                 Logger.Log("TcpListener", string.Format("Received {0}", data));
                 buffer = new byte[256];
-                base.receiver.OnReceiveMessage(data);
+                base.MessageReceived(data);
             }
             Console.WriteLine("Client connected completed");
 
@@ -114,7 +114,10 @@ namespace WinRemote_Server.Connections.Listener
 
         public override void Stop()
         {
-            StatusChanged(NetworkStatus.CLOSING);
+            if (GetStatus() == NetworkStatus.RUNNING || GetStatus() == NetworkStatus.STARTING || GetStatus() == NetworkStatus.CLOSING)
+            {
+                StatusChanged(NetworkStatus.CLOSING);
+            }
             listen = false;
             tcpClientConnected.Set();
         }

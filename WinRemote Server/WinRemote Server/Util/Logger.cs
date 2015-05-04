@@ -61,11 +61,13 @@ namespace WinRemote_Server
         {
             private string fileName;
             private RichTextBox logBox = null;
+            private StreamWriter writer;
 
             public LoggerInstance(string fileName, ref RichTextBox logBox)
             {
                 this.fileName = fileName;
                 this.logBox = logBox;
+                this.writer = CreateWriter(fileName);
             }
 
             /// <summary>
@@ -83,14 +85,27 @@ namespace WinRemote_Server
 
             public void Log(string prefix, string message)
             {
-                StreamWriter writer = CreateWriter(fileName);
+                if (writer == null)
+                {
+                    writer = CreateWriter(fileName);
+                }
+                
                 string logLine = CreateTimeString() + ": " + prefix + "\t" + message + "\n";
                 //write to log window
-                logBox.Invoke((MethodInvoker)(() => logBox.AppendText(logLine)));
-                //logBox.AppendText(logLine);
+                try
+                {
+                    logBox.Invoke((MethodInvoker)(() => 
+                        {
+                            logBox.AppendText(logLine);
+                            logBox.SelectionStart = logBox.Text.Length;
+                            logBox.ScrollToCaret();
+                        }
+                    ));
+                    logBox.Invoke((MethodInvoker)(() => logBox.ScrollToCaret()));
+                    logBox.Invoke((MethodInvoker)(() => logBox.ScrollToCaret()));
+                } catch { }
                 //write to file
                 writer.Write(logLine);
-                writer.Close();
             }
         }
 
