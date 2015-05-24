@@ -1,0 +1,11 @@
+int newDeviceID;
+ 
+// Set newDeviceID here, by some means. A common scenario
+// is to save the value using the registry so it can be toggled.
+ 
+Process.Start(new ProcessStartInfo("EndPointController.exe", newDeviceID.ToString())
+{
+    UseShellExecute = false,
+    RedirectStandardOutput = true,
+    CreateNoWindow = true
+});
