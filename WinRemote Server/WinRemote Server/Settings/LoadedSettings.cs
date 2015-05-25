@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace WinRemote_Server.Settings
 {
@@ -11,6 +9,7 @@ namespace WinRemote_Server.Settings
         public const string KEY_BINDING_ADDRESS = "bindingAddress";
         public const string KEY_USE_BINDING_ADDRESS = "useBindingAddress";
         public const string KEY_PORT = "port";
+        public const string KEY_TCP_RUNNING = "tcpRunning";
 
         private static class Defaults
         {
@@ -21,6 +20,7 @@ namespace WinRemote_Server.Settings
                 defaults.Add(KEY_BINDING_ADDRESS, "");
                 defaults.Add(KEY_USE_BINDING_ADDRESS, "false");
                 defaults.Add(KEY_PORT, "5555");
+                defaults.Add(KEY_TCP_RUNNING, "false");
             }
 
             public static string GetValue(string key)
@@ -42,6 +42,16 @@ namespace WinRemote_Server.Settings
 
         private static Dictionary<string, string> settings = new Dictionary<string, string>();
         public static bool initialized = false;
+
+        public static void WriteValue(string key, int value)
+        {
+            WriteValue(key, value.ToString());
+        }
+
+        public static void WriteValue(string key, bool value)
+        {
+            WriteValue(key, value.ToString());
+        }
 
         public static void WriteValue(string key, string value)
         {

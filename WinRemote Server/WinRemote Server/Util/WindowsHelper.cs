@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Management;
+using System.Diagnostics;
 
 namespace WinRemote_Server.Util
 {
@@ -36,6 +37,45 @@ namespace WinRemote_Server.Util
             {
                 mboShutdown = manObj.InvokeMethod("Win32Shutdown", mboShutdownParams, null);
             }
+        }
+
+        public static Dictionary<int, string> GetSoundDevices()
+        {
+            Process process = new Process();
+            process.StartInfo.UseShellExecute = false;
+            process.StartInfo.RedirectStandardOutput = true;
+            process.StartInfo.Arguments = "-1";
+            process.StartInfo.CreateNoWindow = true;
+            process.Start();
+            process.WaitForExit();
+            string output = process.StandardOutput.ReadToEnd().Trim();
+            string[] lines = output.Split(new char[] { '\n' });
+
+            Dictionary<int, string> devices = new Dictionary<int, string>();
+            foreach (string deviceLine in lines)
+            {
+                string num = "";
+                int currIndex = 0;
+                char nextChar = '0';
+                while (nextChar != ' ')
+                {
+                    num += nextChar;
+                    nextChar = deviceLine[++currIndex];
+                }
+                devices.Add(int.Parse(num), deviceLine.Substring(currIndex + 1));
+            }
+
+            return devices;
+        }
+
+        public static void SetSoundDevice(int id)
+        {
+            Process process = new Process();
+            process.StartInfo.UseShellExecute = false;
+            process.StartInfo.RedirectStandardOutput = true;
+            process.StartInfo.Arguments = id.ToString();
+            process.StartInfo.CreateNoWindow = true;
+            process.Start();
         }
     }
 }

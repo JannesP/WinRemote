@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using WinRemote_Server.Connections.Receiver;
+using WinRemote_Server.Settings;
 
 namespace WinRemote_Server.Connections.Listener
 {
@@ -29,6 +30,7 @@ namespace WinRemote_Server.Connections.Listener
 
         public override void Start()
         {
+            LoadedSettings.WriteValue(LoadedSettings.KEY_TCP_RUNNING, true);
             StatusChanged(NetworkStatus.STARTING);
             listen = true;
             listenThread = new Thread(() => Listen(tcpListener));
@@ -82,13 +84,13 @@ namespace WinRemote_Server.Connections.Listener
             using (Socket client = listener.EndAcceptSocket(ar))
             {
                 // Process the connection here.
-                byte[] buffer = new byte[64];
+                byte[] buffer = new byte[32];
                 int data = -1;
                 client.Receive(buffer);
-                Logger.Log("TcpListener", "Connection from: " + client.RemoteEndPoint.ToString() + ".");
+                Logger.Log("TcpListener", "Connection from: " + client.RemoteEndPoint.ToString() + ", processing ...");
                 data = ReadIntFromByteArray(buffer, 0);
-                Logger.Log("TcpListener", string.Format("Received {0}", data));
-                buffer = new byte[256];
+                Logger.Log("TcpListener", string.Format("Received id: {0}.", data));
+                buffer = new byte[32];
                 base.MessageReceived(data);
             }
             Console.WriteLine("Client connected completed");
@@ -100,7 +102,7 @@ namespace WinRemote_Server.Connections.Listener
 
         private static int ReadIntFromByteArray(byte[] input, int startIndex)
         {
-            if (input.Length - 4 > startIndex) throw new ArgumentOutOfRangeException("The startIndex was too big.");
+            if (input.Length - 4 < startIndex) throw new ArgumentOutOfRangeException("The startIndex was too big.");
 
             int result = 0;
 
@@ -114,14 +116,14 @@ namespace WinRemote_Server.Connections.Listener
 
         public override void Stop()
         {
+            if (!Program.onShutdown) LoadedSettings.WriteValue(LoadedSettings.KEY_TCP_RUNNING, false); //don't set the tcpListener on off if we are shutting down the application
             if (GetStatus() == NetworkStatus.RUNNING || GetStatus() == NetworkStatus.STARTING || GetStatus() == NetworkStatus.CLOSING)
             {
                 StatusChanged(NetworkStatus.CLOSING);
             }
             listen = false;
             tcpClientConnected.Set();
+            
         }
-
-        
     }
 }

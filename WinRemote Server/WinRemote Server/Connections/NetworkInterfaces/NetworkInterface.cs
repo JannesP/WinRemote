@@ -70,6 +70,7 @@ namespace WinRemote_Server.Connections.Listener
 
         public enum Message
         {
+            TEST = 123456789,
             SHUTDOWN = 1
         }
     }

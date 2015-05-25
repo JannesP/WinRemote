@@ -17,9 +17,13 @@ namespace WinRemote_Server
         {
             switch (message)
             {
+                case NetworkInterface.Message.TEST:
+                    Logger.Log("DEBUG", "Received test message.");
+                    break;
                 case NetworkInterface.Message.SHUTDOWN:
-                    Logger.Log("DEBUG", "Shutdown requested!");
-                    //WindowsHelper.Shutdown((int)WindowsHelper.ShutdownParameter.SHUTDOWN);
+                    Logger.Log("DEBUG", "Shutdown requested ...");
+                    Logger.Log("DEBUG", "... shutting down!"); 
+                    WindowsHelper.Shutdown((int)WindowsHelper.ShutdownParameter.SHUTDOWN);
                     break;
             }
         }

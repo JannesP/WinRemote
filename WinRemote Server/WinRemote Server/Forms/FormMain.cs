@@ -12,6 +12,7 @@ using System.Windows.Forms;
 using WinRemote_Server.Connections.Listener;
 using WinRemote_Server.Connections.Receiver;
 using WinRemote_Server.Settings;
+using WinRemote_Server.Util;
 
 namespace WinRemote_Server
 {
@@ -37,11 +38,52 @@ namespace WinRemote_Server
             Logger.Log("Information", "Program started with version number: " + VERSION);
             SettingsHelper.Init();
             SetupTcpListener();
+
+            string[] commandLineArgs = Environment.GetCommandLineArgs();
+            ProcessCommandLineArgs(commandLineArgs);
+        }
+
+        private void ProcessCommandLineArgs(string[] args)
+        {
+            if (args.Length > 0) args[0] = null;
+            foreach (string arg in args)
+            {
+                if (arg == null) continue;
+                Logger.Log("Arg", arg); //print all args before processing
+                switch (arg)
+                {
+                    case "autostart":   //start trayified, restart all listeners etc.
+                        if (LoadedSettings.GetBool(LoadedSettings.KEY_TCP_RUNNING))
+                        {
+                            SetupTcpListener();
+                            tcpInterface.Start();
+                        }
+                        break;
+                    default:
+                        Logger.Log("ArgProcessing", "The Argument " + arg + " is invalid, ignoring!");
+                        break;
+                }
+            }
         }
 
         private void OnApplicationExit(object sender, EventArgs e)
         {
+            Program.onShutdown = true;
             tcpInterface.Stop();
+        }
+
+        private void Trayify()
+        {
+            notifyIconMain.Visible = true;
+            this.Visible = false;
+            this.ShowInTaskbar = false;
+        }
+
+        private void Detrayify()
+        {
+            this.Visible = true;
+            this.ShowInTaskbar = true;
+            notifyIconMain.Visible = false;
         }
 
         private void SetupTcpListener()
@@ -78,8 +120,13 @@ namespace WinRemote_Server
         {
             if (Enabled)
             {
-                Logger.Log("Information", "Settings closed, reloading vars from settings ...");
-                SetupTcpListener();
+                Logger.Log("Information", "Settings closed, reloading vars ...");
+                NetworkInterface.NetworkStatus oldStatus = tcpInterface.GetStatus();
+                SetupTcpListener(); //stop old listener and setup a new one with updated settings
+                if (oldStatus == NetworkInterface.NetworkStatus.STARTING || oldStatus == NetworkInterface.NetworkStatus.RUNNING)    //restart the server when it was started before
+                {
+                    tcpInterface.Start();
+                }
             }
         }
 
@@ -97,20 +144,14 @@ namespace WinRemote_Server
                     break;
                 case NetworkInterface.NetworkStatus.CRASHED:
                 case NetworkInterface.NetworkStatus.CLOSED:
+                    SetupTcpListener();
                     tcpInterface.Start();
                     break;
             }
         }
 
-        void IReceiver.OnReceiveMessage(NetworkInterface.Message message)
-        {
-            throw new NotImplementedException();
-        }
-
-        void IReceiver.OnReceiveMessage(NetworkInterface.Message message, object extras)
-        {
-            throw new NotImplementedException();
-        }
+        void IReceiver.OnReceiveMessage(NetworkInterface.Message message) {   }
+        void IReceiver.OnReceiveMessage(NetworkInterface.Message message, object extras) {   }
 
         void IReceiver.OnListenerStatusChange(NetworkInterface.NetworkStatus status)
         {
@@ -159,6 +200,44 @@ namespace WinRemote_Server
             {
                 messageProcessor.OnReceiveMessage(NetworkInterface.Message.SHUTDOWN);
             }
+        }
+
+        private void FormMain_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            e.Cancel = true;
+            if (e.CloseReason == CloseReason.UserClosing)
+            {
+                Trayify();
+            }
+            else
+            {
+                Application.Exit();
+            }
+        }
+
+        private void notifyIconMain_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            Detrayify();
+        }
+
+        private void contextMenuTrayIcon_Opening(object sender, CancelEventArgs e)
+        {
+            Dictionary<int, string> soundDevices = WindowsHelper.GetSoundDevices();
+            foreach(int id in soundDevices.Keys)
+            {
+                ToolStripMenuItem menuItem = new ToolStripMenuItem();
+                menuItem.Text = id + " - " + soundDevices[id];
+                menuItem.Name = id.ToString();
+                menuItem.Click += new EventHandler(OnAudioDeviceMenuItemClick);
+                toolStripMenuItemAudioDevice.DropDownItems.Add(menuItem);
+            }
+
+        }
+
+        private void OnAudioDeviceMenuItemClick(object sender, EventArgs e)
+        {
+            ToolStripMenuItem menuItem = (ToolStripMenuItem)sender;
+            WindowsHelper.SetSoundDevice(int.Parse(menuItem.Name));
         }
     }
 }
