@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using WinRemote_Server.Connections.NetworkInterfaces;
 using WinRemote_Server.Connections.Receiver;
 
 namespace WinRemote_Server.Connections.Listener
@@ -11,6 +12,19 @@ namespace WinRemote_Server.Connections.Listener
     abstract class NetworkInterface
     {
         private NetworkStatus status = NetworkStatus.CLOSED;
+
+        private string name = "";
+        public string Name
+        {
+            get
+            {
+                return name;
+            }
+            set
+            {
+                name = value == null ? value : "";
+            }
+        }
 
         protected IReceiver[] receivers = new IReceiver[0];
 
@@ -30,12 +44,12 @@ namespace WinRemote_Server.Connections.Listener
             this.receivers = newList;
         }
 
-        protected void MessageReceived(int message)
+        protected void MessageReceived(NetworkClient connectedClient, int message)
         {
             Message msg = (Message)message;
             foreach (IReceiver receiver in receivers)
             {
-                FormMain.logBox.Invoke((MethodInvoker)(() => receiver.OnReceiveMessage(msg)));
+                FormMain.logBox.Invoke((MethodInvoker)(() => receiver.OnReceiveMessage(connectedClient, msg)));
             }
         }
 
@@ -46,7 +60,7 @@ namespace WinRemote_Server.Connections.Listener
             {
                 try
                 {
-                    FormMain.logBox.Invoke((MethodInvoker)(() => receiver.OnListenerStatusChange(status)));
+                    FormMain.logBox.Invoke((MethodInvoker)(() => receiver.OnListenerStatusChange(this, status)));
                 }
                 catch
                 {
@@ -71,7 +85,12 @@ namespace WinRemote_Server.Connections.Listener
         public enum Message
         {
             TEST = 123456789,
-            SHUTDOWN = 1
+            SHUTDOWN = 1,
+
+            ANSWER = 100,
+
+            REQUEST_VOLUME = 500,
+            REQUEST_MUTED = 501
         }
     }
 }

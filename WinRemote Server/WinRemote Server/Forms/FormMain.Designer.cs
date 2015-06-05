@@ -38,6 +38,8 @@
             this.notifyIconMain = new System.Windows.Forms.NotifyIcon(this.components);
             this.contextMenuTrayIcon = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.toolStripMenuItemAudioDevice = new System.Windows.Forms.ToolStripMenuItem();
+            this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.buttonExit = new System.Windows.Forms.Button();
             this.contextMenuTrayIcon.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -75,11 +77,11 @@
             // richTextBox_log
             // 
             this.richTextBox_log.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.richTextBox_log.Location = new System.Drawing.Point(0, 66);
+            this.richTextBox_log.Location = new System.Drawing.Point(0, 64);
             this.richTextBox_log.Name = "richTextBox_log";
             this.richTextBox_log.ReadOnly = true;
             this.richTextBox_log.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.ForcedVertical;
-            this.richTextBox_log.Size = new System.Drawing.Size(487, 151);
+            this.richTextBox_log.Size = new System.Drawing.Size(484, 151);
             this.richTextBox_log.TabIndex = 3;
             this.richTextBox_log.Text = "";
             // 
@@ -96,7 +98,7 @@
             // notifyIconMain
             // 
             this.notifyIconMain.BalloonTipText = "Right click for fast access. Double click for showing the application.";
-            this.notifyIconMain.BalloonTipTitle = "WinRemote Server";
+            this.notifyIconMain.BalloonTipTitle = "WinRemote Server has been minimized to the tray.";
             this.notifyIconMain.ContextMenuStrip = this.contextMenuTrayIcon;
             this.notifyIconMain.Icon = ((System.Drawing.Icon)(resources.GetObject("notifyIconMain.Icon")));
             this.notifyIconMain.Text = "WinRemote Server";
@@ -106,9 +108,10 @@
             // contextMenuTrayIcon
             // 
             this.contextMenuTrayIcon.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripMenuItemAudioDevice});
+            this.toolStripMenuItemAudioDevice,
+            this.exitToolStripMenuItem});
             this.contextMenuTrayIcon.Name = "contextMenuTrayIcon";
-            this.contextMenuTrayIcon.Size = new System.Drawing.Size(153, 26);
+            this.contextMenuTrayIcon.Size = new System.Drawing.Size(153, 48);
             this.contextMenuTrayIcon.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuTrayIcon_Opening);
             // 
             // toolStripMenuItemAudioDevice
@@ -117,21 +120,41 @@
             this.toolStripMenuItemAudioDevice.Size = new System.Drawing.Size(152, 22);
             this.toolStripMenuItemAudioDevice.Text = "Audio Devices";
             // 
+            // exitToolStripMenuItem
+            // 
+            this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.exitToolStripMenuItem.Text = "Exit";
+            this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
+            // 
+            // buttonExit
+            // 
+            this.buttonExit.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonExit.Location = new System.Drawing.Point(400, 33);
+            this.buttonExit.Name = "buttonExit";
+            this.buttonExit.Size = new System.Drawing.Size(75, 23);
+            this.buttonExit.TabIndex = 6;
+            this.buttonExit.Text = "Exit";
+            this.buttonExit.UseVisualStyleBackColor = true;
+            this.buttonExit.Click += new System.EventHandler(this.buttonExit_Click);
+            // 
             // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(487, 217);
+            this.ClientSize = new System.Drawing.Size(484, 215);
+            this.Controls.Add(this.buttonExit);
             this.Controls.Add(this.button_settings);
             this.Controls.Add(this.richTextBox_log);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.textBox_serverStatus);
             this.Controls.Add(this.button_startServer);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.MaximizeBox = false;
+            this.MinimumSize = new System.Drawing.Size(500, 250);
             this.Name = "FormMain";
             this.Text = "WinRemote Server";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.FormMain_FormClosing);
-            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.FormMain_FormClosed);
             this.Load += new System.EventHandler(this.Form1_Load);
             this.EnabledChanged += new System.EventHandler(this.FormMain_EnabledChanged);
             this.contextMenuTrayIcon.ResumeLayout(false);
@@ -150,6 +173,8 @@
         private System.Windows.Forms.NotifyIcon notifyIconMain;
         private System.Windows.Forms.ContextMenuStrip contextMenuTrayIcon;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemAudioDevice;
+        private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem;
+        private System.Windows.Forms.Button buttonExit;
     }
 }
 

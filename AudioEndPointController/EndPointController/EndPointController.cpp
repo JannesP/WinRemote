@@ -12,7 +12,7 @@
 HRESULT SetDefaultAudioPlaybackDevice(LPCWSTR devID)
 {	
 	IPolicyConfigVista *pPolicyConfig;
-	ERole reserved = eConsole;
+	ERole reserved = eMultimedia;
 
     HRESULT hr = CoCreateInstance(__uuidof(CPolicyConfigVistaClient), 
 		NULL, CLSCTX_ALL, __uuidof(IPolicyConfigVista), (LPVOID *)&pPolicyConfig);
@@ -24,12 +24,63 @@ HRESULT SetDefaultAudioPlaybackDevice(LPCWSTR devID)
 	return hr;
 }
 
+HRESULT GetDeviceName(IMMDevice* pDevice, char** outString) 
+{
+	HRESULT hr = CoInitialize(NULL);
+
+	IPropertyStore *pStore;
+	hr = pDevice->OpenPropertyStore(STGM_READ, &pStore); //get the properties of the current device
+	if (SUCCEEDED(hr))
+	{
+		PROPVARIANT friendlyName;
+		PropVariantInit(&friendlyName);
+		hr = pStore->GetValue(PKEY_Device_FriendlyName, &friendlyName); //get the readably name of the current device
+		if (SUCCEEDED(hr))
+		{
+			*outString = (char*)friendlyName.pwszVal;
+			PropVariantClear(&friendlyName);
+		}
+		pStore->Release();
+	}
+	
+	return hr;
+}
+
 // EndPointController.exe [NewDefaultDeviceID]
 int _tmain(int argc, _TCHAR* argv[])
 {
 	// read the command line option, -1 indicates list devices.
 	int option = -1;
 	if (argc == 2) option = atoi((char*)argv[1]);
+
+	if (option == -2) //if default is requested 
+	{
+		HRESULT hr = CoInitialize(NULL);
+		if (SUCCEEDED(hr))
+		{
+			IMMDeviceEnumerator *pEnum = NULL;
+			// Create a multimedia device enumerator.
+			hr = CoCreateInstance(__uuidof(MMDeviceEnumerator), NULL,
+				CLSCTX_ALL, __uuidof(IMMDeviceEnumerator), (void**)&pEnum);
+			if (SUCCEEDED(hr))
+			{
+				IMMDevice *pDevice = NULL;
+				hr = pEnum->GetDefaultAudioEndpoint(EDataFlow::eRender, ERole::eMultimedia, &pDevice);
+				if (SUCCEEDED(hr)) 
+				{
+					char* name = NULL;
+					hr = GetDeviceName(pDevice, &name);
+					if (SUCCEEDED(hr))
+					{
+						LPWST
+						hr = pDevice->GetId()
+					}
+				}
+				pDevice->Release();
+			}
+		}
+		return hr;
+	}
 
 	HRESULT hr = CoInitialize(NULL);
 	if (SUCCEEDED(hr))
@@ -86,5 +137,6 @@ int _tmain(int argc, _TCHAR* argv[])
 			pEnum->Release();
 		}
 	}
+	fflush(stdout);
 	return hr;
 }

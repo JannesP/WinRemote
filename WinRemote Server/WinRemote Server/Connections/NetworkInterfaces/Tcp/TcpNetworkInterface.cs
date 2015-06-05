@@ -6,6 +6,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using WinRemote_Server.Connections.NetworkInterfaces;
 using WinRemote_Server.Connections.Receiver;
 using WinRemote_Server.Settings;
 
@@ -13,6 +14,8 @@ namespace WinRemote_Server.Connections.Listener
 {
     class TcpNetworkInterface : NetworkInterface
     {
+        public const int MSG_SIZE = 32;
+
         // Thread signal. 
         public static ManualResetEvent tcpClientConnected = new ManualResetEvent(false);
 
@@ -84,34 +87,20 @@ namespace WinRemote_Server.Connections.Listener
             using (Socket client = listener.EndAcceptSocket(ar))
             {
                 // Process the connection here.
-                byte[] buffer = new byte[32];
+                byte[] buffer = new byte[MSG_SIZE];
                 int data = -1;
                 client.Receive(buffer);
                 Logger.Log("TcpListener", "Connection from: " + client.RemoteEndPoint.ToString() + ", processing ...");
-                data = ReadIntFromByteArray(buffer, 0);
+                data = Util.Utility.ReadIntFromByteArray(buffer, 0);
                 Logger.Log("TcpListener", string.Format("Received id: {0}.", data));
-                buffer = new byte[32];
-                base.MessageReceived(data);
+                buffer = new byte[MSG_SIZE];
+                base.MessageReceived(new TcpNetworkClient(client), data);
             }
             Console.WriteLine("Client connected completed");
 
             // Signal the calling thread to continue.
             tcpClientConnected.Set();
 
-        }
-
-        private static int ReadIntFromByteArray(byte[] input, int startIndex)
-        {
-            if (input.Length - 4 < startIndex) throw new ArgumentOutOfRangeException("The startIndex was too big.");
-
-            int result = 0;
-
-            for (int i = 3; i >= 0; i--)
-            {
-                result |= input[startIndex + i] << (8 * i);
-            }
-
-            return result;
         }
 
         public override void Stop()
