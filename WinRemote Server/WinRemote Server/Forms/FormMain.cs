@@ -72,6 +72,7 @@ namespace WinRemote_Server
         private void OnApplicationExit(object sender, EventArgs e)
         {
             Program.onShutdown = true;
+            contextMenuTrayIcon.Visible = false;
             SettingsHelper.SaveSettings();
             if (tcpInterface != null)
             {

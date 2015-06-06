@@ -112,11 +112,6 @@ namespace WinRemote_Server
                 }
                 writer.Write(line);
             }
-
-            ~LoggerInstance()
-            {
-                writer.Close();
-            }
         }
 
         
