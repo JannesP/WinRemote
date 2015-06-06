@@ -165,9 +165,8 @@ namespace WinRemote_Server
                     break;
             }
         }
-
-        void IReceiver.OnReceiveMessage(NetworkClient client, NetworkInterface.Message message) {   }
-        void IReceiver.OnReceiveMessage(NetworkClient client, NetworkInterface.Message message, object extras) {   }
+        
+        void IReceiver.OnReceiveMessage(NetworkClient client, NetworkInterface.Message message, byte[] data) {   }
 
         void IReceiver.OnListenerStatusChange(NetworkInterface networkInterface, NetworkInterface.NetworkStatus status)
         {

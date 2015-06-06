@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -85,11 +86,6 @@ namespace WinRemote_Server
 
             public void Log(string prefix, string message)
             {
-                if (writer == null)
-                {
-                    writer = CreateWriter(fileName);
-                }
-                
                 string logLine = CreateTimeString() + ": " + prefix + "\t" + message + "\n";
                 //write to log window
                 try
@@ -102,12 +98,28 @@ namespace WinRemote_Server
                         }
                     ));
                     logBox.Invoke((MethodInvoker)(() => logBox.ScrollToCaret()));
-                    logBox.Invoke((MethodInvoker)(() => logBox.ScrollToCaret()));
                 } catch { }
                 //write to file
-                writer.Write(logLine);
+                Thread t = new Thread(() => writeToFile(logLine));
+                t.Start();
+            }
+
+            private void writeToFile(string line)
+            {
+                if (writer == null)
+                {
+                    writer = CreateWriter(fileName);
+                }
+                writer.Write(line);
+            }
+
+            ~LoggerInstance()
+            {
+                writer.Close();
             }
         }
+
+        
 
         private static string CreateTimeString()
         {

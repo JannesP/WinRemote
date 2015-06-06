@@ -20,6 +20,24 @@ namespace WinRemote_Server.Util
             }
         }
 
+        public static string ArrayToReadableString(byte[] array)
+        {
+            string res = "{ ";
+            for (int i = 0; i < array.Length; i++)
+            {
+                res += array[i].ToString();
+                if (i == (array.Length - 1))
+                {
+                    res += " }";
+                }
+                else
+                {
+                    res += ", ";
+                }
+            }
+            return res;
+        }
+
         public static int ReadIntFromByteArray(byte[] input, int startIndex)
         {
             if (input.Length - 4 < startIndex) throw new ArgumentOutOfRangeException("The startIndex was too big.");

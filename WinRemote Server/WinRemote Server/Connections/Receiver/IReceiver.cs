@@ -11,8 +11,8 @@ namespace WinRemote_Server.Connections.Receiver
 {
     interface IReceiver
     {
-        void OnReceiveMessage(NetworkClient connectedClient, NetworkInterface.Message message);
-        void OnReceiveMessage(NetworkClient connectedClient, NetworkInterface.Message message, object extras);
+        void OnReceiveMessage(NetworkClient connectedClient, NetworkInterface.Message messageId, byte[] data);
         void OnListenerStatusChange(NetworkInterface networkInterface, NetworkInterface.NetworkStatus status);
+        object Invoke(Delegate method);
     }
 }

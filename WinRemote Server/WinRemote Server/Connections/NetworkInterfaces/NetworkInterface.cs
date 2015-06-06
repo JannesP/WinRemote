@@ -44,12 +44,12 @@ namespace WinRemote_Server.Connections.Listener
             this.receivers = newList;
         }
 
-        protected void MessageReceived(NetworkClient connectedClient, int message)
+        protected void MessageReceived(NetworkClient connectedClient, int messageId, byte[] data)
         {
-            Message msg = (Message)message;
+            Message msg = (Message)messageId;
             foreach (IReceiver receiver in receivers)
             {
-                FormMain.logBox.Invoke((MethodInvoker)(() => receiver.OnReceiveMessage(connectedClient, msg)));
+                receiver.Invoke((MethodInvoker)(() => receiver.OnReceiveMessage(connectedClient, msg, data)));
             }
         }
 
@@ -60,7 +60,7 @@ namespace WinRemote_Server.Connections.Listener
             {
                 try
                 {
-                    FormMain.logBox.Invoke((MethodInvoker)(() => receiver.OnListenerStatusChange(this, status)));
+                    receiver.Invoke((MethodInvoker)(() => receiver.OnListenerStatusChange(this, status)));
                 }
                 catch
                 {
@@ -90,7 +90,10 @@ namespace WinRemote_Server.Connections.Listener
             ANSWER = 100,
 
             REQUEST_VOLUME = 500,
-            REQUEST_MUTED = 501
+            REQUEST_MUTED = 501,
+
+            CHANGE_VOLUME = 1000,
+            CHANGE_MUTED = 1001
         }
     }
 }

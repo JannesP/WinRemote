@@ -88,13 +88,15 @@ namespace WinRemote_Server.Connections.Listener
             {
                 // Process the connection here.
                 byte[] buffer = new byte[MSG_SIZE];
-                int data = -1;
+                int messageId = -1;
                 client.Receive(buffer);
                 Logger.Log("TcpListener", "Connection from: " + client.RemoteEndPoint.ToString() + ", processing ...");
-                data = Util.Utility.ReadIntFromByteArray(buffer, 0);
-                Logger.Log("TcpListener", string.Format("Received id: {0}.", data));
-                buffer = new byte[MSG_SIZE];
-                base.MessageReceived(new TcpNetworkClient(client), data);
+                messageId = Util.Utility.ReadIntFromByteArray(buffer, 0);
+                Logger.Log("TcpListener", string.Format("Received id: {0}.", messageId));
+                byte[] extractedData = new byte[buffer.Length - 4];
+                Util.Utility.ArrayCopy(buffer, 4, ref extractedData, 0, extractedData.Length);
+                Logger.Log("TcpListener", string.Format("Id: {0} had the following data: {1}.", messageId, Util.Utility.ArrayToReadableString(extractedData)));
+                base.MessageReceived(new TcpNetworkClient(client), messageId, extractedData);
             }
             Console.WriteLine("Client connected completed");
 

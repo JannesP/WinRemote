@@ -27,19 +27,9 @@ namespace WinRemote_Server.Connections.NetworkInterfaces
         public override void Answer(NetworkInterface.Message messageId, byte[] message)
         {
             byte[] answer = NetworkUtil.CreateAdvancedTcpMessage((int)messageId, message);
-            Logger.Log("TcpAnswer", "Anwering: " + arrayString(answer));
+            Logger.Log("TcpAnswer", "Anwering: " + Utility.ArrayToReadableString(answer));
             socket.Send(answer, 0, answer.Length, SocketFlags.None);
 
-        }
-
-        private String arrayString(byte[] array)
-        {
-            String res = "";
-            foreach (byte b in array)
-            {
-                res += ((int)b).ToString() + ", ";
-            }
-            return res;
         }
 
         ~TcpNetworkClient() {
