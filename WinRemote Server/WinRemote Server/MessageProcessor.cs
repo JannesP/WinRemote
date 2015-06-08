@@ -34,16 +34,16 @@ namespace WinRemote_Server
                     WindowsHelper.Shutdown((int)WindowsHelper.ShutdownParameter.SHUTDOWN);
                     break;
                 case NetworkInterface.Message.REQUEST_VOLUME:
-                    connectedClient.Answer(message, WindowsHelper.GetSystemVolume());
+                    connectedClient.Answer(message, WindowsHelper.Audio.Volume);
                     break;
                 case NetworkInterface.Message.REQUEST_MUTED:
-                    connectedClient.Answer(message, WindowsHelper.GetSystemMuted());
+                    connectedClient.Answer(message, WindowsHelper.Audio.Muted);
                     break;
                 case NetworkInterface.Message.CHANGE_VOLUME:
-                    WindowsHelper.SetSystemVolume(Utility.ReadIntFromByteArray(data, 0));
+                    WindowsHelper.Audio.Volume = (Utility.ReadIntFromByteArray(data, 0));
                     break;
                 case NetworkInterface.Message.CHANGE_MUTED:
-                    WindowsHelper.SetSystemMute((Utility.ReadIntFromByteArray(data, 0) == 0) ? false : true);
+                    WindowsHelper.Audio.Muted = ((Utility.ReadIntFromByteArray(data, 0) == 0) ? false : true);
                     break;
             }
         }

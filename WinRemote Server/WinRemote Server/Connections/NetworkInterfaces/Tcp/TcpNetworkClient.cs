@@ -18,18 +18,23 @@ namespace WinRemote_Server.Connections.NetworkInterfaces
             this.socket = socket;
         }
 
-        public override void Answer(NetworkInterface.Message messageId, int message)
-        {
-            byte[] answer = Utility.CreateBytesFromInt(message);
-            Answer(messageId, answer);
-        }
-
         public override void Answer(NetworkInterface.Message messageId, byte[] message)
         {
             byte[] answer = NetworkUtil.CreateAdvancedTcpMessage((int)messageId, message);
             Logger.Log("TcpAnswer", "Anwering: " + Utility.ArrayToReadableString(answer));
             socket.Send(answer, 0, answer.Length, SocketFlags.None);
 
+        }
+
+        public override void Answer(NetworkInterface.Message messageId, int message)
+        {
+            byte[] answer = Utility.CreateBytesFromInt(message);
+            Answer(messageId, answer);
+        }
+
+        public override void Answer(NetworkInterface.Message messageId, bool message)
+        {
+            Answer(messageId, message ? 1 : 0); //false = 0 : true = 1
         }
 
         ~TcpNetworkClient() {

@@ -1,18 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Drawing;
 using System.Management;
-using System.Diagnostics;
-using System.IO;
-using System.Runtime.InteropServices;
-using NAudio.CoreAudioApi;
 
 namespace WinRemote_Server.Util
 {
     static class WindowsHelper
     {
+        //############ Shutdown #############
         public enum ShutdownParameter
         {
             LOG_OFF = 0x0, SHUTDOWN = 0x1, REBOOT = 0x2, FORCED = 0x4, POWER_OFF = 0x8
@@ -42,106 +37,77 @@ namespace WinRemote_Server.Util
             }
         }
 
+        //########### Audio ##############
         public static Dictionary<int, string> GetSoundDevices()
         {
-            Process process = new Process();
-            process.StartInfo.FileName = Path.Combine(new string[] { System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location), "EndPointController.exe" });
-            process.StartInfo.UseShellExecute = false;
-            process.StartInfo.RedirectStandardOutput = true;
-            process.StartInfo.CreateNoWindow = true;
-            process.Start();
-            process.WaitForExit();
-            string output = process.StandardOutput.ReadToEnd().Trim();
-            string[] lines = output.Split(new char[] { '\n' });
-            for (int i = 0; i < lines.Length; i++)
-            {
-                lines[i] = lines[i].Trim();
-            }
-
-            Dictionary<int, string> devices = new Dictionary<int, string>();
-            foreach (string deviceLine in lines)
-            {
-                string num = "";
-                int currIndex = -1;
-                char nextChar = '0';
-                while (nextChar != ' ')
-                {
-                    num += nextChar;
-                    nextChar = deviceLine[++currIndex];
-                }
-                devices.Add(int.Parse(num), deviceLine.Substring(currIndex + 1));
-            }
-
-            return devices;
+            return APIHelper.Audio.GetSoundDevices();
         }
 
         public static void SetSoundDevice(int id)
         {
-            Process process = new Process();
-            process.StartInfo.FileName = Path.Combine(new string[] { System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location), "EndPointController.exe" });
-            process.StartInfo.UseShellExecute = false;
-            process.StartInfo.RedirectStandardOutput = true;
-            process.StartInfo.Arguments = id.ToString();
-            process.StartInfo.CreateNoWindow = true;
-            process.Start();
+            APIHelper.Audio.SetSoundDevice(id);
         }
 
-        public static int GetSystemMuted()
+        public static class Audio
         {
-            MMDeviceEnumerator deviceEnum = new MMDeviceEnumerator();
-            MMDevice device = deviceEnum.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
-            if (device.State == DeviceState.Active)
+            public static int Volume
             {
-                return device.AudioEndpointVolume.Mute ? 1 : 0;
+                get
+                {
+                    return APIHelper.Audio.GetSystemVolume();
+                }
+                set
+                {
+                    if (value < 0)
+                    {
+                        value = 0;
+                    }
+                    else if (value > 100)
+                    {
+                        value = 100;
+                    }
+                    APIHelper.Audio.SetSystemVolume(value);
+                }
             }
-            else
-            {
-                Logger.Log("NAudio", "Getting the muted state was not successful, device state: " + device.State);
-                return 0;
-            }
-        }
 
-        public static int GetSystemVolume()
-        {
-            MMDeviceEnumerator deviceEnum = new MMDeviceEnumerator();
-            MMDevice device = deviceEnum.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
-            if (device.State == DeviceState.Active)
+            public static bool Muted
             {
-                return (int)(device.AudioEndpointVolume.MasterVolumeLevelScalar * 100f);
-            }
-            else
-            {
-                Logger.Log("NAudio", "Getting the system volume was not successful, device state: " + device.State);
-                return 0;
-            }
-        }
-
-        public static void SetSystemMute(bool mute)
-        {
-            MMDeviceEnumerator deviceEnum = new MMDeviceEnumerator();
-            MMDevice device = deviceEnum.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
-            if (device.State == DeviceState.Active)
-            {
-                device.AudioEndpointVolume.Mute = mute;
-            }
-            else
-            {
-                Logger.Log("NAudio", "Setting the system mute was not successful, device state: " + device.State);
+                get
+                {
+                    return APIHelper.Audio.GetSystemMuted();
+                }
+                set
+                {
+                    APIHelper.Audio.SetSystemMute(value);
+                }
             }
         }
 
-        public static void SetSystemVolume(int volume)
+        //############ Mouse ##############
+        public static class Mouse
         {
-            MMDeviceEnumerator deviceEnum = new MMDeviceEnumerator();
-            MMDevice device = deviceEnum.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
-            if (device.State == DeviceState.Active)
+            public static Point Location
             {
-                device.AudioEndpointVolume.MasterVolumeLevelScalar = volume / 100f;
+                get
+                {
+                    return MouseControl.GetCursorPos();
+                }
+                set
+                {
+                    MouseControl.SetCursorPos(value.X, value.Y);
+                }
             }
-            else
+
+            public static void LeftClick(int x, int y)
             {
-                Logger.Log("NAudio", "Setting the master volume was not successful, device state: " + device.State);
+                MouseControl.LeftMouseClick(x, y);
+            }
+
+            public static void LeftClick(int x, int y, int length)
+            {
+                MouseControl.LeftMouseClick(x, y, length);
             }
         }
+
     }
 }
