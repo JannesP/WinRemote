@@ -81,25 +81,29 @@ namespace WinRemote_Server.Connections.Listener
             if (!listen) return;
             // Get the listener that handles the client request.
             TcpListener listener = (TcpListener)ar.AsyncState;
-
-            // End the operation and display the received data on  
-            // the console.
-            using (Socket client = listener.EndAcceptSocket(ar))
-            {
-                // Process the connection here.
-                byte[] buffer = new byte[MSG_SIZE];
-                int messageId = -1;
-                client.Receive(buffer);
-                Logger.Log("TcpListener", "Connection from: " + client.RemoteEndPoint.ToString() + ", processing ...");
-                messageId = Util.Utility.ReadIntFromByteArray(buffer, 0);
-                Logger.Log("TcpListener", string.Format("Received id: {0}.", messageId));
-                byte[] extractedData = new byte[buffer.Length - 4];
-                Util.Utility.ArrayCopy(buffer, 4, ref extractedData, 0, extractedData.Length);
-                Logger.Log("TcpListener", string.Format("Id: {0} had the following data: {1}.", messageId, Util.Utility.ArrayToReadableString(extractedData)));
-                base.MessageReceived(new TcpNetworkClient(client), messageId, extractedData);
+            try {
+                // End the operation and display the received data on  
+                // the console.
+                using (Socket client = listener.EndAcceptSocket(ar))
+                {
+                    // Process the connection here.
+                    byte[] buffer = new byte[MSG_SIZE];
+                    int messageId = -1;
+                    client.Receive(buffer);
+                    Logger.Log("TcpListener", "Connection from: " + client.RemoteEndPoint.ToString() + ", processing ...");
+                    messageId = Util.Utility.ReadIntFromByteArray(buffer, 0);
+                    Logger.Log("TcpListener", string.Format("Received id: {0}.", messageId));
+                    byte[] extractedData = new byte[buffer.Length - 4];
+                    Util.Utility.ArrayCopy(buffer, 4, ref extractedData, 0, extractedData.Length);
+                    Logger.Log("TcpListener", string.Format("Id: {0} had the following data: {1}.", messageId, Util.Utility.ArrayToReadableString(extractedData)));
+                    base.MessageReceived(new TcpNetworkClient(client), messageId, extractedData);
+                    Logger.Log("TcpListener", "Client connection completed");
+                }
             }
-            Console.WriteLine("Client connected completed");
-
+            catch (ObjectDisposedException)
+            {
+                Logger.Log("TcpListener", "TcpListener stopped! (stream disposed)");
+            }
             // Signal the calling thread to continue.
             tcpClientConnected.Set();
 
