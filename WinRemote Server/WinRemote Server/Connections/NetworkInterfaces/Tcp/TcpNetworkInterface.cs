@@ -112,13 +112,12 @@ namespace WinRemote_Server.Connections.Listener
         public override void Stop()
         {
             if (!Program.onShutdown) LoadedSettings.WriteValue(LoadedSettings.KEY_TCP_RUNNING, false); //don't set the tcpListener on off if we are shutting down the application
-            if (GetStatus() == NetworkStatus.RUNNING || GetStatus() == NetworkStatus.STARTING || GetStatus() == NetworkStatus.CLOSING)
+            if (GetStatus() == NetworkStatus.RUNNING || GetStatus() == NetworkStatus.STARTING)
             {
                 StatusChanged(NetworkStatus.CLOSING);
+                listen = false;
+                tcpClientConnected.Set();
             }
-            listen = false;
-            tcpClientConnected.Set();
-            
         }
     }
 }
