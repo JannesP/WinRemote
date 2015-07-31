@@ -137,12 +137,7 @@ namespace WinRemote_Server
             if (Enabled)
             {
                 Logger.Log("Information", "Settings closed, reloading vars ...");
-                NetworkInterface.NetworkStatus oldStatus = tcpInterface.GetStatus();
-                SetupTcpListener(); //stop old listener and setup a new one with updated settings
-                if (oldStatus == NetworkInterface.NetworkStatus.STARTING || oldStatus == NetworkInterface.NetworkStatus.RUNNING)    //restart the server when it was started before
-                {
-                    tcpInterface.Start();
-                }
+                if (tcpInterface != null) tcpInterface.Stop();
             }
         }
 
