@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security;
+using System.Security.Permissions;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,6 +15,7 @@ namespace WinRemote_Server
     {
         private static bool errorOccured = false;
         private static LoggerInstance instance = null;
+        private static string logFile;
         static Logger()
         {
             string logFile = @"logs\";
@@ -24,18 +27,26 @@ namespace WinRemote_Server
             logFile += DateTime.Now.Second.ToString("00"); //yyyyddmm-hhmmss
             logFile += DateTime.Now.Millisecond.ToString("000"); //yyyyddmm-hhmmssmmm
             logFile += ".log";  //yyyyddmm-hhmmssmmm.log
-
+            Logger.logFile = Path.Combine(Environment.CurrentDirectory, logFile);
             try
             {
                 if (!Directory.Exists(@"logs"))
                 {
                     Directory.CreateDirectory(@"logs");
                 }
-                File.Create(logFile).Close();
+                File.Create(Logger.logFile).Close();
+                if (!CheckWriteExcess(Logger.logFile)) throw new Exception();
             }
             catch (IOException ex)
             {
-                MessageBox.Show("The Log file couldn't be created.\nCheck the permissions and start the program as admin.\n" + ex.ToString(), "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("The Log file couldn't be created.\nCheck the permissions or start the program as admin.\nWe need write access to the executable directory!\n" + ex.ToString(), "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Program.onShutdown = true;
+                Application.Exit();
+            }
+            catch (Exception exception)
+            {
+                MessageBox.Show("The Log file couldn't be created.\nCheck the permissions or start the program as admin.\nWe need write access to the executable directory!", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Program.onShutdown = true;
                 Application.Exit();
             }
 
@@ -119,6 +130,14 @@ namespace WinRemote_Server
         private static string CreateTimeString()
         {
             return string.Format("{0:00}:{1:00}:{2:00}:{3:000}", DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second, DateTime.Now.Millisecond);
+        }
+        
+        private static bool CheckWriteExcess(string path)
+        {
+            PermissionSet permissionSet = new PermissionSet(PermissionState.None);
+            FileIOPermission writePermission = new FileIOPermission(FileIOPermissionAccess.Write | FileIOPermissionAccess.Append, path);
+            permissionSet.AddPermission(writePermission);
+            return permissionSet.IsSubsetOf(AppDomain.CurrentDomain.PermissionSet);
         }
     }
 
