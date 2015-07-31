@@ -35,7 +35,7 @@ namespace WinRemote_Server
                     Directory.CreateDirectory(@"logs");
                 }
                 File.Create(Logger.logFile).Close();
-                if (!CheckWriteExcess(Logger.logFile)) throw new Exception();
+                if (!CheckWriteAccess(Logger.logFile)) throw new Exception();
             }
             catch (IOException ex)
             {
@@ -132,7 +132,7 @@ namespace WinRemote_Server
             return string.Format("{0:00}:{1:00}:{2:00}:{3:000}", DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second, DateTime.Now.Millisecond);
         }
         
-        private static bool CheckWriteExcess(string path)
+        private static bool CheckWriteAccess(string path)
         {
             PermissionSet permissionSet = new PermissionSet(PermissionState.None);
             FileIOPermission writePermission = new FileIOPermission(FileIOPermissionAccess.Write | FileIOPermissionAccess.Append, path);
